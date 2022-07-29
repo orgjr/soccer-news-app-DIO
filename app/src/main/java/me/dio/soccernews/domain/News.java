@@ -1,17 +1,17 @@
 package me.dio.soccernews.domain;
 
 public class News {
-    private String tittle;
+    private String title;
     private String description;
     private String image;
     private String link;
 
-    public String getTittle() {
-        return tittle;
+    public String getTitle() {
+        return title;
     }
 
-    public void setTittle(String tittle) {
-        this.tittle = tittle;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getDescription() {
