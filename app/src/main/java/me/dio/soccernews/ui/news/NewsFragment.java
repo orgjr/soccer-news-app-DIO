@@ -10,7 +10,10 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.google.android.material.snackbar.Snackbar;
+
 import me.dio.soccernews.MainActivity;
+import me.dio.soccernews.R;
 import me.dio.soccernews.data.local.AppDatabase;
 import me.dio.soccernews.databinding.FragmentNewsBinding;
 import me.dio.soccernews.ui.adapters.NewsAdapter;
@@ -19,14 +22,25 @@ public class NewsFragment extends Fragment {
 
     private FragmentNewsBinding binding;
     private AppDatabase db;
+    private NewsViewModel newsViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        NewsViewModel newsViewModel = new ViewModelProvider(this).get(NewsViewModel.class);
+        newsViewModel = new ViewModelProvider(this).get(NewsViewModel.class);
 
         binding = FragmentNewsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         binding.rvNews.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        observeNews();
+        observeStates();
+
+        binding.srlNews.setOnRefreshListener(newsViewModel::findNews);
+
+        return root;
+    }
+
+    private void observeNews() {
         newsViewModel.getNews().observe(getViewLifecycleOwner(), news -> {
             binding.rvNews.setAdapter(new NewsAdapter(news, updatedNews -> {
                 MainActivity activity = (MainActivity) getActivity();
@@ -35,22 +49,22 @@ public class NewsFragment extends Fragment {
                 }
             }));
         });
+    }
 
+    private void observeStates() {
         newsViewModel.getState().observe(getViewLifecycleOwner(), state -> {
             switch (state) {
                 case DOING:
-                    //TODO: iniciar SwipeRefreshLayout (loading)
+                    binding.srlNews.setRefreshing(true);
                     break;
                 case DONE:
-                    //TODO: finalizar SwipeRefreshLayout (loading)
+                    binding.srlNews.setRefreshing(false);
                     break;
                 case ERROR:
-                    //TODO: finalizar SwipeRefreshLayout (loading)
-                    //TODO: mostrar um erro genérico
+                    binding.srlNews.setRefreshing(false);
+                    Snackbar.make(binding.srlNews, R.string.error_network, Snackbar.LENGTH_SHORT).show();
             }
         });
-
-        return root;
     }
 
     @Override
